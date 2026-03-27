@@ -2,25 +2,19 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Fusion World DB - Complete Edition</title>
+    <title>Fusion World DB - JSON Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0b0f1a; color: #f8fafc; font-family: 'Inter', sans-serif; }
         .sticky-header { position: sticky; top: 0; z-index: 50; background: #0b0f1a; padding-bottom: 1rem; border-bottom: 1px solid #1e293b; }
-        
         .table-row { border-bottom: 1px solid #1e293b; transition: all 0.2s; border-left: 4px solid transparent; }
         .table-row:hover { background: #1e293b; }
-        
         .row-owned { background: rgba(251, 191, 36, 0.08) !important; border-left: 4px solid #fbbf24 !important; }
-
-        /* Colori Categorie Set */
         .set-fb { color: #60a5fa; } 
         .set-sb { color: #c084fc; } 
         .set-fs { color: #f87171; } 
         .set-promo { color: #34d399; } 
         .set-energy { color: #fbbf24; } 
-
-        /* Colori Rarità */
         .rare-scr { color: #f59e0b; text-shadow: 0 0 8px rgba(245, 158, 11, 0.4); font-weight: 800; } 
         .rare-sr { color: #cbd5e1; font-weight: 700; } 
         .rare-r { color: #3b82f6; } 
@@ -28,20 +22,24 @@
         .rare-c { color: #94a3b8; } 
         .rare-l { color: #8b5cf6; font-weight: 700; } 
         .rare-aa { color: #ec4899; font-style: italic; font-weight: 700; } 
-
         .nav-btn.active { background-color: #fbbf24 !important; color: #000 !important; opacity: 1 !important; border-color: #fbbf24 !important; }
         input[type=number] { background: #0f172a; border: 1px solid #334155; color: #f8fafc; text-align: center; border-radius: 4px; }
         .filter-owned-box { display: flex; align-items: center; gap: 8px; background: #1e293b; padding: 0 12px; border-radius: 8px; border: 1px solid #334155; height: 38px; cursor: pointer; }
     </style>
 </head>
 <body class="p-2 md:p-6">
+
     <div class="max-w-[1600px] mx-auto">
-        
         <div class="sticky-header">
             <header class="flex flex-col md:flex-row justify-between items-center py-4 gap-4">
                 <div>
                     <h1 class="text-3xl font-black text-yellow-500 italic uppercase">Fusion World DB</h1>
-                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Inventory & Rarity Tracker</p>
+                    <div class="flex gap-2 items-center">
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest text-nowrap">Inventory Tracker</p>
+                        <button onclick="downloadJSON()" class="bg-blue-600 hover:bg-blue-500 text-white text-[10px] px-3 py-1 rounded-full font-black uppercase shadow-lg transition-all">
+                            📥 Scarica Dati (database.json)
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="flex items-center gap-6 bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
@@ -85,8 +83,9 @@
     </div>
 
     <script>
+        let storage = {}; 
+
         const DATABASE = [
-            // FB Series
             { id: "FB01", range: 140, aa: 24, cat: "fb" }, 
             { id: "FB02", range: 144, aa: 24, cat: "fb" },
             { id: "FB03", range: 144, aa: 24, cat: "fb" }, 
@@ -96,10 +95,8 @@
             { id: "FB07", range: 144, aa: 24, cat: "fb" },
             { id: "FB08", range: 144, aa: 24, cat: "fb" },
             { id: "FB09", range: 144, aa: 24, cat: "fb" },
-            // SB Series
             { id: "SB01", range: 132, aa: 0, cat: "sb" },  
             { id: "SB02", range: 132, aa: 0, cat: "sb" },
-            // Starter Decks
             { id: "FS01", range: 16, cat: "fs" }, 
             { id: "FS02", range: 16, cat: "fs" },
             { id: "FS03", range: 16, cat: "fs" },
@@ -107,7 +104,6 @@
             { id: "FS05", range: 16, cat: "fs" },
             { id: "FS06", range: 16, cat: "fs" },
             { id: "FS07", range: 16, cat: "fs" },
-            // Promos & Energy
             { id: "FP", range: 100, cat: "promo" }, 
             { id: "E", range: 100, cat: "energy" }
         ];
@@ -120,16 +116,25 @@
             energy: "bg-amber-900/40 border-amber-700 text-amber-300 hover:bg-amber-800"
         };
 
+        async function loadDatabase() {
+            try {
+                // Carica il file JSON dalla stessa cartella (funziona su GitHub Pages)
+                const response = await fetch('database.json?v=' + Date.now());
+                if (response.ok) {
+                    storage = await response.json();
+                }
+            } catch (e) {
+                console.log("Inizializzazione database vuoto.");
+            }
+            init(); 
+        }
+
         function getRarityInfo(id, isAA) {
             if (isAA) return { label: "ALT-ART", class: "rare-aa" };
-            if (id.startsWith('E-')) return { label: "ENERGY", class: "set-energy" }; // Etichetta specifica per Energy
-            
+            if (id.startsWith('E-')) return { label: "ENERGY", class: "set-energy" };
             const parts = id.split('-');
             const num = parseInt(parts[1]);
-            
-            // Esclude i Leader per Promo e Energy
             if (num <= 4 && !id.includes('FP') && !id.includes('E')) return { label: "LEADER", class: "rare-l" };
-            
             if (id.includes('FB')) {
                 if (num > 130) return { label: "SECRET", class: "rare-scr" };
                 if (num > 100) return { label: "SUPER RARE", class: "rare-sr" };
@@ -142,8 +147,6 @@
             return { label: "STANDARD", class: "rare-c" };
         }
 
-        let storage = JSON.parse(localStorage.getItem('db_fw_v10')) || {};
-
         function init() {
             const tabs = document.getElementById('set-tabs');
             DATABASE.forEach(set => {
@@ -154,12 +157,9 @@
                 tabs.appendChild(btn);
 
                 for (let i = 1; i <= set.range; i++) {
-                    // FIX: Se il set è 'E' (Energy), usa 2 cifre. Altrimenti usa 3 cifre.
                     const padding = set.id === 'E' ? 2 : 3;
                     const baseCode = `${set.id}-${String(i).padStart(padding, '0')}`;
-                    
                     addListRow(baseCode, false, set.id, set.cat);
-                    
                     if (set.aa && i <= set.aa) {
                         addListRow(`${baseCode} (AA)`, true, set.id, set.cat);
                     }
@@ -173,14 +173,12 @@
             const list = document.getElementById('master-list');
             const data = storage[id] || { qty: 0, price: "0.00" };
             const rarity = getRarityInfo(id, isAA);
-
             const div = document.createElement('div');
             div.className = `table-row grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 p-3 items-center text-sm ${data.qty > 0 ? 'row-owned' : ''}`;
             div.dataset.set = setId;
             div.dataset.qty = data.qty;
             div.dataset.cleanCode = id.toLowerCase().replace(/[^a-z0-9]/g, '');
             div.id = `row-${id}`;
-
             div.innerHTML = `
                 <div class="flex flex-col">
                     <div class="flex items-center gap-2">
@@ -210,20 +208,15 @@
             const row = document.getElementById(`row-${id}`);
             row.dataset.qty = storage[id].qty;
             storage[id].qty > 0 ? row.classList.add('row-owned') : row.classList.remove('row-owned');
-            save(id);
+            updateStats();
+            document.getElementById(`total-${id}`).innerText = `€ ${(storage[id].qty * storage[id].price).toFixed(2)}`;
             applyFilters();
         }
 
         function updatePrice(id, val) {
             if (!storage[id]) storage[id] = { qty: 0, price: "0.00" };
             storage[id].price = parseFloat(val).toFixed(2);
-            save(id);
-        }
-
-        function save(id) {
-            const data = storage[id];
-            document.getElementById(`total-${id}`).innerText = `€ ${(data.qty * data.price).toFixed(2)}`;
-            localStorage.setItem('db_fw_v10', JSON.stringify(storage));
+            document.getElementById(`total-${id}`).innerText = `€ ${(storage[id].qty * storage[id].price).toFixed(2)}`;
             updateStats();
         }
 
@@ -245,30 +238,32 @@
             const showOnlyOwned = document.getElementById('owned-only').checked;
             const activeBtn = document.querySelector('.nav-btn.active');
             const activeSet = activeBtn ? activeBtn.innerText : 'GLOBALE';
-
             document.querySelectorAll('.table-row').forEach(row => {
                 const qty = parseInt(row.dataset.qty) || 0;
-                
-                // 1. Filtro per Testo (Search)
                 const matchesSearch = searchVal === '' || row.dataset.cleanCode.includes(searchVal);
-                
-                // 2. Filtro per Possesso (Checkbox)
                 const matchesOwned = !showOnlyOwned || qty > 0;
-                
-                // 3. Filtro per Set (Tab)
-                // Se siamo su "Globale", matchesSet è sempre true. Altrimenti controlla il dataset.set
                 const matchesSet = activeSet.toLowerCase().includes('globale') || row.dataset.set === activeSet;
-
-                // La riga viene mostrata SOLO se soddisfa TUTTE le condizioni contemporaneamente
-                if (matchesSearch && matchesOwned && matchesSet) {
-                    row.style.display = 'grid';
-                } else {
-                    row.style.display = 'none';
-                }
+                row.style.display = (matchesSearch && matchesOwned && matchesSet) ? 'grid' : 'none';
             });
         }
 
-        init();
+        // FUNZIONE PER SCARICARE IL JSON
+        function downloadJSON() {
+            const cleanedStorage = {};
+            for (const key in storage) {
+                if (storage[key].qty > 0) cleanedStorage[key] = storage[key];
+            }
+            const blob = new Blob([JSON.stringify(cleanedStorage, null, 4)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "database.json";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Avvio: Carica i dati dal file JSON
+        loadDatabase();
     </script>
 </body>
 </html>
