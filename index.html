@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Fusion World DB - Complete Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0b0f1a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .sticky-header { position: sticky; top: 0; z-index: 50; background: #0b0f1a; padding-bottom: 1rem; border-bottom: 1px solid #1e293b; }
+        
+        .table-row { border-bottom: 1px solid #1e293b; transition: all 0.2s; border-left: 4px solid transparent; }
+        .table-row:hover { background: #1e293b; }
+        
+        .row-owned { background: rgba(251, 191, 36, 0.08) !important; border-left: 4px solid #fbbf24 !important; }
+
+        /* Colori Categorie Set */
+        .set-fb { color: #60a5fa; } 
+        .set-sb { color: #c084fc; } 
+        .set-fs { color: #f87171; } 
+        .set-promo { color: #34d399; } 
+        .set-energy { color: #fbbf24; } 
+
+        /* Colori Rarità */
+        .rare-scr { color: #f59e0b; text-shadow: 0 0 8px rgba(245, 158, 11, 0.4); font-weight: 800; } 
+        .rare-sr { color: #cbd5e1; font-weight: 700; } 
+        .rare-r { color: #3b82f6; } 
+        .rare-uc { color: #10b981; } 
+        .rare-c { color: #94a3b8; } 
+        .rare-l { color: #8b5cf6; font-weight: 700; } 
+        .rare-aa { color: #ec4899; font-style: italic; font-weight: 700; } 
+
+        .nav-btn.active { background-color: #fbbf24 !important; color: #000 !important; opacity: 1 !important; border-color: #fbbf24 !important; }
+        input[type=number] { background: #0f172a; border: 1px solid #334155; color: #f8fafc; text-align: center; border-radius: 4px; }
+        .filter-owned-box { display: flex; align-items: center; gap: 8px; background: #1e293b; padding: 0 12px; border-radius: 8px; border: 1px solid #334155; height: 38px; cursor: pointer; }
+    </style>
+</head>
+<body class="p-2 md:p-6">
+    <div class="max-w-[1600px] mx-auto">
+        
+        <div class="sticky-header">
+            <header class="flex flex-col md:flex-row justify-between items-center py-4 gap-4">
+                <div>
+                    <h1 class="text-3xl font-black text-yellow-500 italic uppercase">Fusion World DB</h1>
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Inventory & Rarity Tracker</p>
+                </div>
+                
+                <div class="flex items-center gap-6 bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+                    <div class="text-center px-4 border-r border-slate-700">
+                        <span class="block text-[10px] text-slate-500 font-bold uppercase">Carte Totali</span>
+                        <span id="stat-owned" class="text-2xl font-mono text-yellow-500">0</span>
+                    </div>
+                    <div class="text-center px-4">
+                        <span class="block text-[10px] text-slate-500 font-bold uppercase">Valore Totale</span>
+                        <span id="stat-value" class="text-2xl font-mono text-green-400">€ 0.00</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <label class="filter-owned-box">
+                        <input type="checkbox" id="owned-only" onchange="applyFilters()" class="w-4 h-4 accent-yellow-500">
+                        <span class="text-[10px] font-bold uppercase text-slate-300">Solo Possedute</span>
+                    </label>
+                    <input type="text" id="search" placeholder="Cerca codice..." oninput="applyFilters()"
+                           class="w-full md:w-64 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:border-yellow-500 outline-none font-bold">
+                </div>
+            </header>
+
+            <nav class="flex flex-wrap gap-2 mt-2" id="set-tabs">
+                <button onclick="switchSet('ALL', this)" class="nav-btn bg-slate-700 px-4 py-1.5 rounded text-[10px] border border-slate-500 font-black transition-all opacity-60 hover:opacity-100 uppercase">Globale</button>
+            </nav>
+        </div>
+
+        <div class="mt-6 bg-slate-900 rounded-t-xl border border-slate-800 overflow-hidden">
+            <div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 p-4 text-[10px] font-black uppercase tracking-wider text-slate-500 border-b border-slate-800">
+                <div class="col-span-1">Carta / Rarità</div>
+                <div class="hidden md:block">Versione Art</div>
+                <div class="text-center">Quantità</div>
+                <div class="text-center">Prezzo (€)</div>
+                <div class="text-center">Totale (€)</div>
+                <div class="hidden lg:block text-right">Cardmarket</div>
+            </div>
+        </div>
+
+        <div id="master-list" class="bg-slate-900/50 border-x border-b border-slate-800 rounded-b-xl overflow-hidden mb-20"></div>
+    </div>
+
+    <script>
+        const DATABASE = [
+            // FB Series
+            { id: "FB01", range: 140, aa: 24, cat: "fb" }, 
+            { id: "FB02", range: 144, aa: 24, cat: "fb" },
+            { id: "FB03", range: 144, aa: 24, cat: "fb" }, 
+            { id: "FB04", range: 144, aa: 24, cat: "fb" },
+            { id: "FB05", range: 144, aa: 24, cat: "fb" },
+            { id: "FB06", range: 144, aa: 24, cat: "fb" },
+            { id: "FB07", range: 144, aa: 24, cat: "fb" },
+            { id: "FB08", range: 144, aa: 24, cat: "fb" },
+            { id: "FB09", range: 144, aa: 24, cat: "fb" },
+            // SB Series
+            { id: "SB01", range: 132, aa: 0, cat: "sb" },  
+            { id: "SB02", range: 132, aa: 0, cat: "sb" },
+            // Starter Decks
+            { id: "FS01", range: 16, cat: "fs" }, 
+            { id: "FS02", range: 16, cat: "fs" },
+            { id: "FS03", range: 16, cat: "fs" },
+            { id: "FS04", range: 16, cat: "fs" },
+            { id: "FS05", range: 16, cat: "fs" },
+            { id: "FS06", range: 16, cat: "fs" },
+            { id: "FS07", range: 16, cat: "fs" },
+            // Promos & Energy
+            { id: "FP", range: 100, cat: "promo" }, 
+            { id: "E", range: 100, cat: "energy" }
+        ];
+
+        const CAT_STYLE = {
+            fb: "bg-blue-900/40 border-blue-700 text-blue-300 hover:bg-blue-800",
+            sb: "bg-purple-900/40 border-purple-700 text-purple-300 hover:bg-purple-800",
+            fs: "bg-red-900/40 border-red-700 text-red-300 hover:bg-red-800",
+            promo: "bg-green-900/40 border-green-700 text-green-300 hover:bg-green-800",
+            energy: "bg-amber-900/40 border-amber-700 text-amber-300 hover:bg-amber-800"
+        };
+
+        function getRarityInfo(id, isAA) {
+            if (isAA) return { label: "ALT-ART", class: "rare-aa" };
+            if (id.startsWith('E-')) return { label: "ENERGY", class: "set-energy" }; // Etichetta specifica per Energy
+            
+            const parts = id.split('-');
+            const num = parseInt(parts[1]);
+            
+            // Esclude i Leader per Promo e Energy
+            if (num <= 4 && !id.includes('FP') && !id.includes('E')) return { label: "LEADER", class: "rare-l" };
+            
+            if (id.includes('FB')) {
+                if (num > 130) return { label: "SECRET", class: "rare-scr" };
+                if (num > 100) return { label: "SUPER RARE", class: "rare-sr" };
+                if (num > 70) return { label: "RARE", class: "rare-r" };
+                if (num > 40) return { label: "UNCOMMON", class: "rare-uc" };
+                return { label: "COMMON", class: "rare-c" };
+            }
+            if (id.includes('FS')) return { label: "STARTER", class: "rare-sr" };
+            if (id.includes('FP')) return { label: "PROMO", class: "rare-p" };
+            return { label: "STANDARD", class: "rare-c" };
+        }
+
+        let storage = JSON.parse(localStorage.getItem('db_fw_v10')) || {};
+
+        function init() {
+            const tabs = document.getElementById('set-tabs');
+            DATABASE.forEach(set => {
+                const btn = document.createElement('button');
+                btn.className = `nav-btn px-3 py-1.5 rounded text-[10px] border font-bold transition-all opacity-60 hover:opacity-100 ${CAT_STYLE[set.cat]}`;
+                btn.innerText = set.id;
+                btn.onclick = () => switchSet(set.id, btn);
+                tabs.appendChild(btn);
+
+                for (let i = 1; i <= set.range; i++) {
+                    // FIX: Se il set è 'E' (Energy), usa 2 cifre. Altrimenti usa 3 cifre.
+                    const padding = set.id === 'E' ? 2 : 3;
+                    const baseCode = `${set.id}-${String(i).padStart(padding, '0')}`;
+                    
+                    addListRow(baseCode, false, set.id, set.cat);
+                    
+                    if (set.aa && i <= set.aa) {
+                        addListRow(`${baseCode} (AA)`, true, set.id, set.cat);
+                    }
+                }
+            });
+            switchSet("FB01", tabs.children[1]); 
+            updateStats();
+        }
+
+        function addListRow(id, isAA, setId, cat) {
+            const list = document.getElementById('master-list');
+            const data = storage[id] || { qty: 0, price: "0.00" };
+            const rarity = getRarityInfo(id, isAA);
+
+            const div = document.createElement('div');
+            div.className = `table-row grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 p-3 items-center text-sm ${data.qty > 0 ? 'row-owned' : ''}`;
+            div.dataset.set = setId;
+            div.dataset.qty = data.qty;
+            div.dataset.cleanCode = id.toLowerCase().replace(/[^a-z0-9]/g, '');
+            div.id = `row-${id}`;
+
+            div.innerHTML = `
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full set-${cat} bg-current"></span>
+                        <span class="font-mono font-bold text-slate-200 text-xs">${id}</span>
+                    </div>
+                    <span class="text-[9px] font-black uppercase tracking-tighter pl-3.5 ${rarity.class}">${rarity.label}</span>
+                </div>
+                <div class="hidden md:block text-[10px] font-bold text-slate-500 uppercase">${isAA ? 'Alt Art' : 'Regular'}</div>
+                <div class="flex justify-center">
+                    <input type="number" min="0" value="${data.qty}" onchange="updateQty('${id}', this.value)" class="w-12 py-1 text-yellow-500 font-bold outline-none">
+                </div>
+                <div class="flex justify-center">
+                    <input type="number" step="0.01" value="${data.price}" onchange="updatePrice('${id}', this.value)" class="bg-transparent border border-slate-800 rounded w-16 text-center text-green-400 font-bold py-1 text-xs">
+                </div>
+                <div class="text-center font-mono font-bold text-white" id="total-${id}">€ ${(data.qty * data.price).toFixed(2)}</div>
+                <div class="hidden lg:block text-right">
+                    <a href="https://www.cardmarket.com/en/DragonBallSuper/Products/Search?searchString=${id}" target="_blank" class="text-blue-400 hover:text-blue-300 text-[10px] font-bold underline decoration-dotted">MARKET ↗</a>
+                </div>
+            `;
+            list.appendChild(div);
+        }
+
+        function updateQty(id, val) {
+            if (!storage[id]) storage[id] = { qty: 0, price: "0.00" };
+            storage[id].qty = parseInt(val) || 0;
+            const row = document.getElementById(`row-${id}`);
+            row.dataset.qty = storage[id].qty;
+            storage[id].qty > 0 ? row.classList.add('row-owned') : row.classList.remove('row-owned');
+            save(id);
+            applyFilters();
+        }
+
+        function updatePrice(id, val) {
+            if (!storage[id]) storage[id] = { qty: 0, price: "0.00" };
+            storage[id].price = parseFloat(val).toFixed(2);
+            save(id);
+        }
+
+        function save(id) {
+            const data = storage[id];
+            document.getElementById(`total-${id}`).innerText = `€ ${(data.qty * data.price).toFixed(2)}`;
+            localStorage.setItem('db_fw_v10', JSON.stringify(storage));
+            updateStats();
+        }
+
+        function updateStats() {
+            let q = 0, v = 0;
+            Object.values(storage).forEach(i => { q += i.qty; v += (i.qty * i.price); });
+            document.getElementById('stat-owned').innerText = q;
+            document.getElementById('stat-value').innerText = `€ ${v.toFixed(2)}`;
+        }
+
+        function switchSet(setId, btn) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const searchVal = document.getElementById('search').value.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const showOnlyOwned = document.getElementById('owned-only').checked;
+            const activeBtn = document.querySelector('.nav-btn.active');
+            const activeSet = activeBtn ? activeBtn.innerText : 'GLOBALE';
+
+            document.querySelectorAll('.table-row').forEach(row => {
+                const qty = parseInt(row.dataset.qty) || 0;
+                
+                // 1. Filtro per Testo (Search)
+                const matchesSearch = searchVal === '' || row.dataset.cleanCode.includes(searchVal);
+                
+                // 2. Filtro per Possesso (Checkbox)
+                const matchesOwned = !showOnlyOwned || qty > 0;
+                
+                // 3. Filtro per Set (Tab)
+                // Se siamo su "Globale", matchesSet è sempre true. Altrimenti controlla il dataset.set
+                const matchesSet = activeSet.toLowerCase().includes('globale') || row.dataset.set === activeSet;
+
+                // La riga viene mostrata SOLO se soddisfa TUTTE le condizioni contemporaneamente
+                if (matchesSearch && matchesOwned && matchesSet) {
+                    row.style.display = 'grid';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
