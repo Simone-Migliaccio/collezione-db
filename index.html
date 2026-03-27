@@ -2,72 +2,36 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fusion World</title>
+    <title>Fusion World DB - JSON Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0b0f1a; color: #f8fafc; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        /* Header Fisso */
-        .sticky-header { 
-            position: sticky; 
-            top: 0; 
-            z-index: 50; 
-            background: #0b0f1a; 
-            padding-bottom: 1rem; 
-            border-bottom: 1px solid #1e293b; 
-        }
-
-        /* Supporto per scroll orizzontale dei tasti Set su mobile */
-        #set-tabs {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 5px;
-            gap: 8px;
-        }
-        #set-tabs::-webkit-scrollbar { display: none; }
-        .nav-btn { flex: 0 0 auto; }
-
-        /* Stili righe */
+        body { background-color: #0b0f1a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .sticky-header { position: sticky; top: 0; z-index: 50; background: #0b0f1a; padding-bottom: 1rem; border-bottom: 1px solid #1e293b; }
         .table-row { border-bottom: 1px solid #1e293b; transition: all 0.2s; border-left: 4px solid transparent; }
         .table-row:hover { background: #1e293b; }
         .row-owned { background: rgba(251, 191, 36, 0.08) !important; border-left: 4px solid #fbbf24 !important; }
         
-        /* Colori e Rarità */
+        /* COLORI SET */
         .set-fb { color: #60a5fa; } 
         .set-sb { color: #c084fc; } 
         .set-fs { color: #f87171; } 
         .set-promo { color: #34d399; } 
         .set-energy { color: #fbbf24; } 
-        .rare-scr { color: #f59e0b; text-shadow: 0 0 8px rgba(245, 158, 11, 0.4); font-weight: 800; } 
-        .rare-sr { color: #cbd5e1; font-weight: 700; } 
-        .rare-r { color: #3b82f6; } 
-        .rare-uc { color: #10b981; } 
-        .rare-c { color: #94a3b8; } 
-        .rare-l { color: #8b5cf6; font-weight: 700; } 
-        .rare-aa { color: #ec4899; font-style: italic; font-weight: 700; } 
-        
-        .nav-btn.active { background-color: #fbbf24 !important; color: #000 !important; opacity: 1 !important; border-color: #fbbf24 !important; }
-        
-        /* Input ottimizzati per il tocco (min altezza 40px su mobile per facilitare il clic) */
-        input[type=number] { 
-            background: #0f172a; 
-            border: 1px solid #334155; 
-            color: #f8fafc; 
-            text-align: center; 
-            border-radius: 4px; 
-            font-size: 16px; /* Evita lo zoom automatico su iOS */
-        }
 
-        @media (max-width: 768px) {
-            .table-row { grid-template-columns: 1.5fr 1fr 1fr !important; gap: 0.5rem; }
-            .header-grid { grid-template-columns: 1.5fr 1fr 1fr !important; gap: 0.5rem; }
-            .mobile-hide { display: none !important; }
-            .stat-box { padding: 0.5rem !important; }
-            .stat-text { font-size: 1.25rem !important; }
-        }
+        /* COLORI RARITÀ SPECIFICI */
+        .rare-scr { color: #f59e0b; text-shadow: 0 0 8px rgba(245, 158, 11, 0.5); font-weight: 800; }
+        .rare-sr { color: #e2e8f0; font-weight: 700; text-shadow: 0 0 5px rgba(255, 255, 255, 0.3); }
+        .rare-r { color: #3b82f6; font-weight: 600; }
+        .rare-uc { color: #10b981; font-weight: 600; }
+        .rare-c { color: #94a3b8; }
+        .rare-l { color: #a855f7; font-weight: 800; text-transform: uppercase; }
+        .rare-aa { color: #ec4899; font-style: italic; font-weight: 800; text-shadow: 0 0 8px rgba(236, 72, 153, 0.4); }
+        .rare-p { color: #22d3ee; font-weight: 700; }
+        .rare-energy { color: #fbbf24; font-weight: 700; }
+
+        .nav-btn.active { background-color: #fbbf24 !important; color: #000 !important; opacity: 1 !important; border-color: #fbbf24 !important; }
+        input[type=number] { background: #0f172a; border: 1px solid #334155; color: #f8fafc; text-align: center; border-radius: 4px; }
+        .filter-owned-box { display: flex; align-items: center; gap: 8px; background: #1e293b; padding: 0 12px; border-radius: 8px; border: 1px solid #334155; height: 38px; cursor: pointer; }
     </style>
 </head>
 <body class="p-2 md:p-6">
@@ -75,52 +39,49 @@
     <div class="max-w-[1600px] mx-auto">
         <div class="sticky-header">
             <header class="flex flex-col md:flex-row justify-between items-center py-4 gap-4">
-                <div class="w-full md:w-auto flex justify-between items-center">
-                    <div>
-                        <h1 class="text-2xl md:text-3xl font-black text-yellow-500 italic uppercase">Fusion World DB</h1>
-                        <p class="text-slate-500 text-[9px] font-bold uppercase tracking-widest">Inventory Tracker</p>
+                <div>
+                    <h1 class="text-3xl font-black text-yellow-500 italic uppercase">Fusion World DB</h1>
+                    <div class="flex gap-2 items-center">
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest text-nowrap">Inventory Tracker</p>
+                        <button onclick="downloadJSON()" class="bg-blue-600 hover:bg-blue-500 text-white text-[10px] px-3 py-1 rounded-full font-black uppercase shadow-lg transition-all">
+                            📥 Scarica Dati (database.json)
+                        </button>
                     </div>
-                    <button onclick="downloadJSON()" class="md:hidden bg-blue-600 text-white text-[10px] px-3 py-2 rounded-full font-black uppercase shadow-lg">
-                        📥 JSON
-                    </button>
                 </div>
                 
-                <div class="flex items-center gap-3 md:gap-6 bg-slate-900 p-3 md:p-4 rounded-xl border border-slate-800 shadow-xl w-full md:w-auto justify-around">
-                    <div class="text-center px-2 md:px-4 border-r border-slate-700 flex-1">
-                        <span class="block text-[8px] md:text-[10px] text-slate-500 font-bold uppercase">Carte</span>
-                        <span id="stat-owned" class="stat-text text-xl md:text-2xl font-mono text-yellow-500 leading-none">0</span>
+                <div class="flex items-center gap-6 bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+                    <div class="text-center px-4 border-r border-slate-700">
+                        <span class="block text-[10px] text-slate-500 font-bold uppercase">Carte Totali</span>
+                        <span id="stat-owned" class="text-2xl font-mono text-yellow-500">0</span>
                     </div>
-                    <div class="text-center px-2 md:px-4 flex-1">
-                        <span class="block text-[8px] md:text-[10px] text-slate-500 font-bold uppercase">Valore</span>
-                        <span id="stat-value" class="stat-text text-xl md:text-2xl font-mono text-green-400 leading-none">€ 0.00</span>
+                    <div class="text-center px-4">
+                        <span class="block text-[10px] text-slate-500 font-bold uppercase">Valore Totale</span>
+                        <span id="stat-value" class="text-2xl font-mono text-green-400">€ 0.00</span>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 w-full md:w-auto">
-                    <label class="filter-owned-box flex-shrink-0 flex items-center gap-2 bg-slate-800 border border-slate-700 px-3 h-10 rounded-lg cursor-pointer">
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <label class="filter-owned-box">
                         <input type="checkbox" id="owned-only" onchange="applyFilters()" class="w-4 h-4 accent-yellow-500">
-                        <span class="text-[9px] font-bold uppercase text-slate-300">Possedute</span>
+                        <span class="text-[10px] font-bold uppercase text-slate-300">Solo Possedute</span>
                     </label>
-                    <input type="text" id="search" placeholder="Cerca..." oninput="applyFilters()"
-                           class="flex-1 md:w-64 bg-slate-800 border border-slate-700 rounded-lg px-4 h-10 text-sm focus:border-yellow-500 outline-none font-bold">
-                    <button onclick="downloadJSON()" class="hidden md:block bg-blue-600 hover:bg-blue-500 text-white text-[10px] px-4 py-2 rounded-full font-black uppercase shadow-lg transition-all">
-                        📥 Scarica JSON
-                    </button>
+                    <input type="text" id="search" placeholder="Cerca codice..." oninput="applyFilters()"
+                           class="w-full md:w-64 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:border-yellow-500 outline-none font-bold">
                 </div>
             </header>
 
-            <nav id="set-tabs" class="mt-2">
+            <nav class="flex flex-wrap gap-2 mt-2" id="set-tabs">
                 <button onclick="switchSet('ALL', this)" class="nav-btn bg-slate-700 px-4 py-1.5 rounded text-[10px] border border-slate-500 font-black transition-all opacity-60 hover:opacity-100 uppercase">Globale</button>
             </nav>
         </div>
 
-        <div class="mt-4 bg-slate-900 rounded-t-xl border border-slate-800 overflow-hidden">
-            <div class="header-grid grid grid-cols-3 md:grid-cols-6 lg:grid-cols-7 gap-4 p-4 text-[10px] font-black uppercase tracking-wider text-slate-500 border-b border-slate-800">
-                <div class="">Carta</div>
-                <div class="mobile-hide">Art</div>
+        <div class="mt-6 bg-slate-900 rounded-t-xl border border-slate-800 overflow-hidden">
+            <div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 p-4 text-[10px] font-black uppercase tracking-wider text-slate-500 border-b border-slate-800">
+                <div class="col-span-1">Carta / Rarità</div>
+                <div class="hidden md:block">Versione Art</div>
                 <div class="text-center">Quantità</div>
                 <div class="text-center">Prezzo (€)</div>
-                <div class="text-center mobile-hide">Totale (€)</div>
+                <div class="text-center">Totale (€)</div>
                 <div class="hidden lg:block text-right">Cardmarket</div>
             </div>
         </div>
@@ -165,17 +126,21 @@
         async function loadDatabase() {
             try {
                 const response = await fetch('database.json?v=' + Date.now());
-                if (response.ok) storage = await response.json();
-            } catch (e) { console.log("DB vuoto."); }
+                if (response.ok) {
+                    storage = await response.json();
+                }
+            } catch (e) {
+                console.log("Inizializzazione database vuoto.");
+            }
             init(); 
         }
 
         function getRarityInfo(id, isAA) {
             if (isAA) return { label: "ALT-ART", class: "rare-aa" };
-            if (id.startsWith('E-')) return { label: "ENERGY", class: "set-energy" };
+            if (id.startsWith('E-')) return { label: "ENERGY", class: "rare-energy" };
             const parts = id.split('-');
             const num = parseInt(parts[1]);
-            if (num <= 4 && !id.includes('FP') && !id.includes('E')) return { label: "LEADER", class: "rare-l" };
+            if (num <= 4 && id.includes('FB')) return { label: "LEADER", class: "rare-l" };
             if (id.includes('FB')) {
                 if (num > 130) return { label: "SECRET", class: "rare-scr" };
                 if (num > 100) return { label: "SUPER RARE", class: "rare-sr" };
@@ -183,6 +148,8 @@
                 if (num > 40) return { label: "UNCOMMON", class: "rare-uc" };
                 return { label: "COMMON", class: "rare-c" };
             }
+            if (id.includes('FS')) return { label: "STARTER", class: "rare-sr" };
+            if (id.includes('FP')) return { label: "PROMO", class: "rare-p" };
             return { label: "STANDARD", class: "rare-c" };
         }
 
@@ -190,7 +157,7 @@
             const tabs = document.getElementById('set-tabs');
             DATABASE.forEach(set => {
                 const btn = document.createElement('button');
-                btn.className = `nav-btn px-4 py-1.5 rounded text-[10px] border font-bold transition-all opacity-60 hover:opacity-100 ${CAT_STYLE[set.cat]}`;
+                btn.className = `nav-btn px-3 py-1.5 rounded text-[10px] border font-bold transition-all opacity-60 hover:opacity-100 ${CAT_STYLE[set.cat]}`;
                 btn.innerText = set.id;
                 btn.onclick = () => switchSet(set.id, btn);
                 tabs.appendChild(btn);
@@ -213,11 +180,16 @@
             const data = storage[id] || { qty: 0, price: "0.00" };
             const rarity = getRarityInfo(id, isAA);
             const div = document.createElement('div');
-            div.className = `table-row grid grid-cols-3 md:grid-cols-6 lg:grid-cols-7 gap-4 p-3 items-center text-sm ${data.qty > 0 ? 'row-owned' : ''}`;
+            div.className = `table-row grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 p-3 items-center text-sm ${data.qty > 0 ? 'row-owned' : ''}`;
             div.dataset.set = setId;
             div.dataset.qty = data.qty;
             div.dataset.cleanCode = id.toLowerCase().replace(/[^a-z0-9]/g, '');
             div.id = `row-${id}`;
+
+            // Modifica colori Colonna Art
+            const artLabel = isAA ? 'Alt Art' : 'Regular';
+            const artClass = isAA ? 'text-pink-400 italic' : 'text-cyan-400 opacity-80';
+
             div.innerHTML = `
                 <div class="flex flex-col">
                     <div class="flex items-center gap-2">
@@ -226,16 +198,16 @@
                     </div>
                     <span class="text-[9px] font-black uppercase tracking-tighter pl-3.5 ${rarity.class}">${rarity.label}</span>
                 </div>
-                <div class="mobile-hide text-[10px] font-bold text-slate-500 uppercase">${isAA ? 'Alt Art' : 'Regular'}</div>
+                <div class="hidden md:block text-[10px] font-black uppercase ${artClass}">${artLabel}</div>
                 <div class="flex justify-center">
-                    <input type="number" min="0" value="${data.qty}" onchange="updateQty('${id}', this.value)" class="w-14 py-2 font-bold outline-none text-yellow-500">
+                    <input type="number" min="0" value="${data.qty}" onchange="updateQty('${id}', this.value)" class="w-12 py-1 text-yellow-500 font-bold outline-none">
                 </div>
                 <div class="flex justify-center">
-                    <input type="number" step="0.01" value="${data.price}" onchange="updatePrice('${id}', this.value)" class="bg-transparent border border-slate-800 rounded w-20 text-center text-green-400 font-bold py-2 text-xs">
+                    <input type="number" step="0.01" value="${data.price}" onchange="updatePrice('${id}', this.value)" class="bg-transparent border border-slate-800 rounded w-16 text-center text-green-400 font-bold py-1 text-xs">
                 </div>
-                <div class="text-center font-mono font-bold text-white mobile-hide" id="total-${id}">€ ${(data.qty * data.price).toFixed(2)}</div>
+                <div class="text-center font-mono font-bold text-white" id="total-${id}">€ ${(data.qty * data.price).toFixed(2)}</div>
                 <div class="hidden lg:block text-right">
-                    <a href="https://www.cardmarket.com/en/DragonBallSuper/Products/Search?searchString=${id}" target="_blank" class="text-blue-400 text-[10px] font-bold underline">MARKET ↗</a>
+                    <a href="https://www.cardmarket.com/en/DragonBallSuper/Products/Search?searchString=${id}" target="_blank" class="text-blue-400 hover:text-blue-300 text-[10px] font-bold underline decoration-dotted">MARKET ↗</a>
                 </div>
             `;
             list.appendChild(div);
@@ -248,16 +220,14 @@
             row.dataset.qty = storage[id].qty;
             storage[id].qty > 0 ? row.classList.add('row-owned') : row.classList.remove('row-owned');
             updateStats();
-            const totalDiv = document.getElementById(`total-${id}`);
-            if(totalDiv) totalDiv.innerText = `€ ${(storage[id].qty * storage[id].price).toFixed(2)}`;
+            document.getElementById(`total-${id}`).innerText = `€ ${(storage[id].qty * storage[id].price).toFixed(2)}`;
             applyFilters();
         }
 
         function updatePrice(id, val) {
             if (!storage[id]) storage[id] = { qty: 0, price: "0.00" };
             storage[id].price = parseFloat(val).toFixed(2);
-            const totalDiv = document.getElementById(`total-${id}`);
-            if(totalDiv) totalDiv.innerText = `€ ${(storage[id].qty * storage[id].price).toFixed(2)}`;
+            document.getElementById(`total-${id}`).innerText = `€ ${(storage[id].qty * storage[id].price).toFixed(2)}`;
             updateStats();
         }
 
