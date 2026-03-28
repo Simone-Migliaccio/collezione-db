@@ -30,7 +30,15 @@
         .rare-energy { color: #fbbf24; font-weight: 700; }
 
         .nav-btn.active { background-color: #fbbf24 !important; color: #000 !important; opacity: 1 !important; border-color: #fbbf24 !important; }
-        input[type=number] { background: #0f172a; border: 1px solid #334155; color: #f8fafc; text-align: center; border-radius: 4px; }
+        
+        /* Stile tasti quantità */
+        .qty-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: 900; transition: all 0.1s; user-select: none; cursor: pointer; }
+        .qty-btn:active { transform: scale(0.9); }
+        .btn-minus { background: #7f1d1d; color: #f87171; border: 1px solid #ef4444; }
+        .btn-minus:hover { background: #b91c1c; color: white; }
+        .btn-plus { background: #064e3b; color: #34d399; border: 1px solid #10b981; }
+        .btn-plus:hover { background: #047857; color: white; }
+
         .filter-owned-box { display: flex; align-items: center; gap: 8px; background: #1e293b; padding: 0 12px; border-radius: 8px; border: 1px solid #334155; height: 38px; cursor: pointer; }
     </style>
 </head>
@@ -186,7 +194,6 @@
             div.dataset.cleanCode = id.toLowerCase().replace(/[^a-z0-9]/g, '');
             div.id = `row-${id}`;
 
-            // Modifica colori Colonna Art
             const artLabel = isAA ? 'Alt Art' : 'Regular';
             const artClass = isAA ? 'text-pink-400 italic' : 'text-cyan-400 opacity-80';
 
@@ -199,11 +206,16 @@
                     <span class="text-[9px] font-black uppercase tracking-tighter pl-3.5 ${rarity.class}">${rarity.label}</span>
                 </div>
                 <div class="hidden md:block text-[10px] font-black uppercase ${artClass}">${artLabel}</div>
-                <div class="flex justify-center">
-                    <input type="number" min="0" value="${data.qty}" onchange="updateQty('${id}', this.value)" class="w-12 py-1 text-yellow-500 font-bold outline-none">
+                
+                <div class="flex items-center justify-center gap-3">
+                    <div class="qty-btn btn-minus" onclick="changeQty('${id}', -1)">-</div>
+                    <span id="qty-val-${id}" class="w-6 text-center text-yellow-500 font-black font-mono text-base">${data.qty}</span>
+                    <div class="qty-btn btn-plus" onclick="changeQty('${id}', 1)">+</div>
                 </div>
+
                 <div class="flex justify-center">
-                    <input type="number" step="0.01" value="${data.price}" onchange="updatePrice('${id}', this.value)" class="bg-transparent border border-slate-800 rounded w-16 text-center text-green-400 font-bold py-1 text-xs">
+                    <input type="number" step="0.01" value="${data.price}" onchange="updatePrice('${id}', this.value)" 
+                           class="bg-slate-800 border border-slate-700 rounded w-16 text-center text-green-400 font-bold py-1 text-xs outline-none focus:border-green-500">
                 </div>
                 <div class="text-center font-mono font-bold text-white" id="total-${id}">€ ${(data.qty * data.price).toFixed(2)}</div>
                 <div class="hidden lg:block text-right">
@@ -213,20 +225,31 @@
             list.appendChild(div);
         }
 
-        function updateQty(id, val) {
+        // Funzione per gestire l'aumento/diminuzione
+        function changeQty(id, delta) {
             if (!storage[id]) storage[id] = { qty: 0, price: "0.00" };
-            storage[id].qty = parseInt(val) || 0;
+            
+            let newQty = storage[id].qty + delta;
+            if (newQty < 0) newQty = 0; // Mai sotto lo zero
+
+            storage[id].qty = newQty;
+            
+            // Aggiorna interfaccia
+            document.getElementById(`qty-val-${id}`).innerText = newQty;
             const row = document.getElementById(`row-${id}`);
-            row.dataset.qty = storage[id].qty;
-            storage[id].qty > 0 ? row.classList.add('row-owned') : row.classList.remove('row-owned');
+            row.dataset.qty = newQty;
+            
+            newQty > 0 ? row.classList.add('row-owned') : row.classList.remove('row-owned');
+            
+            document.getElementById(`total-${id}`).innerText = `€ ${(newQty * storage[id].price).toFixed(2)}`;
+            
             updateStats();
-            document.getElementById(`total-${id}`).innerText = `€ ${(storage[id].qty * storage[id].price).toFixed(2)}`;
             applyFilters();
         }
 
         function updatePrice(id, val) {
             if (!storage[id]) storage[id] = { qty: 0, price: "0.00" };
-            storage[id].price = parseFloat(val).toFixed(2);
+            storage[id].price = parseFloat(val).toFixed(2) || 0;
             document.getElementById(`total-${id}`).innerText = `€ ${(storage[id].qty * storage[id].price).toFixed(2)}`;
             updateStats();
         }
