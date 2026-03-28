@@ -11,14 +11,12 @@
         .table-row:hover { background: #1e293b; }
         .row-owned { background: rgba(251, 191, 36, 0.08) !important; border-left: 4px solid #fbbf24 !important; }
         
-        /* COLORI SET */
         .set-fb { color: #60a5fa; } 
         .set-sb { color: #c084fc; } 
         .set-fs { color: #f87171; } 
         .set-promo { color: #34d399; } 
         .set-energy { color: #fbbf24; } 
 
-        /* COLORI RARITÀ SPECIFICI */
         .rare-scr { color: #f59e0b; text-shadow: 0 0 8px rgba(245, 158, 11, 0.5); font-weight: 800; }
         .rare-sr { color: #e2e8f0; font-weight: 700; text-shadow: 0 0 5px rgba(255, 255, 255, 0.3); }
         .rare-r { color: #3b82f6; font-weight: 600; }
@@ -31,7 +29,6 @@
 
         .nav-btn.active { background-color: #fbbf24 !important; color: #000 !important; opacity: 1 !important; border-color: #fbbf24 !important; }
         
-        /* Stile tasti quantità */
         .qty-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: 900; transition: all 0.1s; user-select: none; cursor: pointer; }
         .qty-btn:active { transform: scale(0.9); }
         .btn-minus { background: #7f1d1d; color: #f87171; border: 1px solid #ef4444; }
@@ -49,10 +46,21 @@
             <header class="flex flex-col md:flex-row justify-between items-center py-4 gap-4">
                 <div>
                     <h1 class="text-3xl font-black text-yellow-500 italic uppercase">Fusion World DB</h1>
-                    <div class="flex gap-2 items-center">
-                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest text-nowrap">Inventory Tracker</p>
+                    <div class="flex flex-wrap gap-2 items-center mt-2">
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest text-nowrap mr-2">Inventory Tracker</p>
+                        
                         <button onclick="downloadJSON()" class="bg-blue-600 hover:bg-blue-500 text-white text-[10px] px-3 py-1 rounded-full font-black uppercase shadow-lg transition-all">
-                            📥 Scarica Dati (database.json)
+                            📥 Scarica
+                        </button>
+
+                        <label class="bg-purple-600 hover:bg-purple-500 text-white text-[10px] px-3 py-1 rounded-full font-black uppercase shadow-lg transition-all cursor-pointer">
+                            📤 Carica Dati
+                            <input type="file" id="upload-input" class="hidden" accept=".json" onchange="uploadJSON(event)">
+                        </label>
+
+                        <button onclick="if(confirm('Attenzione: questo cancellerà tutti i dati salvati nel browser. Continuare?')){localStorage.removeItem(LS_KEY); location.reload();}" 
+                                class="bg-red-900/40 hover:bg-red-800 text-red-400 text-[10px] px-3 py-1 rounded-full font-black uppercase border border-red-800 transition-all">
+                            Reset
                         </button>
                     </div>
                 </div>
@@ -74,7 +82,7 @@
                         <span class="text-[10px] font-bold uppercase text-slate-300">Solo Possedute</span>
                     </label>
                     <input type="text" id="search" placeholder="Cerca codice..." oninput="applyFilters()"
-                           class="w-full md:w-64 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:border-yellow-500 outline-none font-bold">
+                           class="w-full md:w-64 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:border-yellow-500 outline-none font-bold text-white">
                 </div>
             </header>
 
@@ -99,6 +107,7 @@
 
     <script>
         let storage = {}; 
+        const LS_KEY = 'fusion_world_db_v1';
 
         const DATABASE = [
             { id: "FB01", range: 140, aa: 24, cat: "fb" }, 
@@ -110,17 +119,17 @@
             { id: "FB07", range: 144, aa: 24, cat: "fb" },
             { id: "FB08", range: 144, aa: 24, cat: "fb" },
             { id: "FB09", range: 144, aa: 24, cat: "fb" },
-            { id: "SB01", range: 132, aa: 0, cat: "sb" },  
-            { id: "SB02", range: 132, aa: 0, cat: "sb" },
-            { id: "FS01", range: 16, cat: "fs" }, 
-            { id: "FS02", range: 16, cat: "fs" },
-            { id: "FS03", range: 16, cat: "fs" },
-            { id: "FS04", range: 16, cat: "fs" },
-            { id: "FS05", range: 16, cat: "fs" },
-            { id: "FS06", range: 16, cat: "fs" },
-            { id: "FS07", range: 16, cat: "fs" },
-            { id: "FP", range: 100, cat: "promo" }, 
-            { id: "E", range: 100, cat: "energy" }
+            { id: "SB01", range: 132, aa: 12, cat: "sb" },
+            { id: "SB02", range: 132, aa: 12, cat: "sb" },
+            { id: "FS01", range: 16, aa: 0, cat: "fs" }, 
+            { id: "FS02", range: 16, aa: 0, cat: "fs" },
+            { id: "FS03", range: 16, aa: 0, cat: "fs" },
+            { id: "FS04", range: 16, aa: 0, cat: "fs" },
+            { id: "FS05", range: 16, aa: 0, cat: "fs" },
+            { id: "FS06", range: 16, aa: 0, cat: "fs" },
+            { id: "FS07", range: 16, aa: 0, cat: "fs" },
+            { id: "FP", range: 100, aa: 0, cat: "promo" }, 
+            { id: "E", range: 100, aa: 0, cat: "energy" }
         ];
 
         const CAT_STYLE = {
@@ -131,16 +140,47 @@
             energy: "bg-amber-900/40 border-amber-700 text-amber-300 hover:bg-amber-800"
         };
 
+        function saveToLocalStorage() {
+            localStorage.setItem(LS_KEY, JSON.stringify(storage));
+        }
+
         async function loadDatabase() {
-            try {
-                const response = await fetch('database.json?v=' + Date.now());
-                if (response.ok) {
-                    storage = await response.json();
+            const savedData = localStorage.getItem(LS_KEY);
+            if (savedData) {
+                storage = JSON.parse(savedData);
+                console.log("Dati caricati dal LocalStorage.");
+            } else {
+                try {
+                    const response = await fetch('database.json?v=' + Date.now());
+                    if (response.ok) {
+                        storage = await response.json();
+                        console.log("Dati caricati da database.json.");
+                    }
+                } catch (e) {
+                    console.log("Inizializzazione database vuoto.");
                 }
-            } catch (e) {
-                console.log("Inizializzazione database vuoto.");
             }
             init(); 
+        }
+
+        function uploadJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (confirm("Caricare i dati? Questo sovrascriverà l'inventario attuale.")) {
+                        storage = importedData;
+                        saveToLocalStorage();
+                        location.reload();
+                    }
+                } catch (err) {
+                    alert("Errore: Il file selezionato non è un JSON valido.");
+                }
+            };
+            reader.readAsText(file);
         }
 
         function getRarityInfo(id, isAA) {
@@ -148,8 +188,8 @@
             if (id.startsWith('E-')) return { label: "ENERGY", class: "rare-energy" };
             const parts = id.split('-');
             const num = parseInt(parts[1]);
-            if (num <= 4 && id.includes('FB')) return { label: "LEADER", class: "rare-l" };
-            if (id.includes('FB')) {
+            if (id.includes('FB') || id.includes('SB')) {
+                if (num <= 4) return { label: "LEADER", class: "rare-l" };
                 if (num > 130) return { label: "SECRET", class: "rare-scr" };
                 if (num > 100) return { label: "SUPER RARE", class: "rare-sr" };
                 if (num > 70) return { label: "RARE", class: "rare-r" };
@@ -163,6 +203,9 @@
 
         function init() {
             const tabs = document.getElementById('set-tabs');
+            const list = document.getElementById('master-list');
+            list.innerHTML = ""; 
+
             DATABASE.forEach(set => {
                 const btn = document.createElement('button');
                 btn.className = `nav-btn px-3 py-1.5 rounded text-[10px] border font-bold transition-all opacity-60 hover:opacity-100 ${CAT_STYLE[set.cat]}`;
@@ -197,6 +240,14 @@
             const artLabel = isAA ? 'Alt Art' : 'Regular';
             const artClass = isAA ? 'text-pink-400 italic' : 'text-cyan-400 opacity-80';
 
+            // Logica correzione link per Cardmarket (FS set)
+            let marketCode = id.split(' ')[0]; 
+            if (setId.startsWith('FS')) {
+                const parts = marketCode.split('-');
+                const num = parseInt(parts[1]);
+                marketCode = `${parts[0]}-${num < 10 ? '0' + num : num}`;
+            }
+
             div.innerHTML = `
                 <div class="flex flex-col">
                     <div class="flex items-center gap-2">
@@ -206,43 +257,34 @@
                     <span class="text-[9px] font-black uppercase tracking-tighter pl-3.5 ${rarity.class}">${rarity.label}</span>
                 </div>
                 <div class="hidden md:block text-[10px] font-black uppercase ${artClass}">${artLabel}</div>
-                
                 <div class="flex items-center justify-center gap-3">
                     <div class="qty-btn btn-minus" onclick="changeQty('${id}', -1)">-</div>
                     <span id="qty-val-${id}" class="w-6 text-center text-yellow-500 font-black font-mono text-base">${data.qty}</span>
                     <div class="qty-btn btn-plus" onclick="changeQty('${id}', 1)">+</div>
                 </div>
-
                 <div class="flex justify-center">
                     <input type="number" step="0.01" value="${data.price}" onchange="updatePrice('${id}', this.value)" 
                            class="bg-slate-800 border border-slate-700 rounded w-16 text-center text-green-400 font-bold py-1 text-xs outline-none focus:border-green-500">
                 </div>
                 <div class="text-center font-mono font-bold text-white" id="total-${id}">€ ${(data.qty * data.price).toFixed(2)}</div>
                 <div class="hidden lg:block text-right">
-                    <a href="https://www.cardmarket.com/en/DragonBallSuper/Products/Search?searchString=${id}" target="_blank" class="text-blue-400 hover:text-blue-300 text-[10px] font-bold underline decoration-dotted">MARKET ↗</a>
+                    <a href="https://www.cardmarket.com/en/DragonBallSuper/Products/Search?searchString=${marketCode}" target="_blank" class="text-blue-400 hover:text-blue-300 text-[10px] font-bold underline decoration-dotted">MARKET ↗</a>
                 </div>
             `;
             list.appendChild(div);
         }
 
-        // Funzione per gestire l'aumento/diminuzione
         function changeQty(id, delta) {
             if (!storage[id]) storage[id] = { qty: 0, price: "0.00" };
-            
             let newQty = storage[id].qty + delta;
-            if (newQty < 0) newQty = 0; // Mai sotto lo zero
-
+            if (newQty < 0) newQty = 0;
             storage[id].qty = newQty;
-            
-            // Aggiorna interfaccia
             document.getElementById(`qty-val-${id}`).innerText = newQty;
             const row = document.getElementById(`row-${id}`);
             row.dataset.qty = newQty;
-            
             newQty > 0 ? row.classList.add('row-owned') : row.classList.remove('row-owned');
-            
             document.getElementById(`total-${id}`).innerText = `€ ${(newQty * storage[id].price).toFixed(2)}`;
-            
+            saveToLocalStorage(); 
             updateStats();
             applyFilters();
         }
@@ -251,6 +293,7 @@
             if (!storage[id]) storage[id] = { qty: 0, price: "0.00" };
             storage[id].price = parseFloat(val).toFixed(2) || 0;
             document.getElementById(`total-${id}`).innerText = `€ ${(storage[id].qty * storage[id].price).toFixed(2)}`;
+            saveToLocalStorage(); 
             updateStats();
         }
 
