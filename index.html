@@ -2,7 +2,8 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Fusion World DB - JSON Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fusion World DB - Collector Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0b0f1a; color: #f8fafc; font-family: 'Inter', sans-serif; }
@@ -25,6 +26,7 @@
         .rare-l { color: #a855f7; font-weight: 800; text-transform: uppercase; }
         .rare-aa { color: #ec4899; font-style: italic; font-weight: 800; text-shadow: 0 0 8px rgba(236, 72, 153, 0.4); }
         .rare-p { color: #22d3ee; font-weight: 700; }
+        .rare-st { color: #f87171; font-weight: 700; }
         .rare-energy { color: #fbbf24; font-weight: 700; }
 
         .nav-btn.active { background-color: #fbbf24 !important; color: #000 !important; opacity: 1 !important; border-color: #fbbf24 !important; }
@@ -47,21 +49,13 @@
                 <div>
                     <h1 class="text-3xl font-black text-yellow-500 italic uppercase">Fusion World DB</h1>
                     <div class="flex flex-wrap gap-2 items-center mt-2">
-                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest text-nowrap mr-2">Inventory Tracker</p>
-                        
-                        <button onclick="downloadJSON()" class="bg-blue-600 hover:bg-blue-500 text-white text-[10px] px-3 py-1 rounded-full font-black uppercase shadow-lg transition-all">
-                            📥 Scarica
-                        </button>
-
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest text-nowrap mr-2">Collector Edition</p>
+                        <button onclick="downloadJSON()" class="bg-blue-600 hover:bg-blue-500 text-white text-[10px] px-3 py-1 rounded-full font-black uppercase shadow-lg transition-all">📥 Scarica</button>
                         <label class="bg-purple-600 hover:bg-purple-500 text-white text-[10px] px-3 py-1 rounded-full font-black uppercase shadow-lg transition-all cursor-pointer">
                             📤 Carica Dati
                             <input type="file" id="upload-input" class="hidden" accept=".json" onchange="uploadJSON(event)">
                         </label>
-
-                        <button onclick="if(confirm('Attenzione: questo cancellerà tutti i dati salvati nel browser. Continuare?')){localStorage.removeItem(LS_KEY); location.reload();}" 
-                                class="bg-red-900/40 hover:bg-red-800 text-red-400 text-[10px] px-3 py-1 rounded-full font-black uppercase border border-red-800 transition-all">
-                            Reset
-                        </button>
+                        <button onclick="if(confirm('Resettare i dati?')){localStorage.removeItem(LS_KEY); location.reload();}" class="bg-red-900/40 hover:bg-red-800 text-red-400 text-[10px] px-3 py-1 rounded-full font-black uppercase border border-red-800 transition-all">Reset</button>
                     </div>
                 </div>
                 
@@ -87,7 +81,7 @@
             </header>
 
             <nav class="flex flex-wrap gap-2 mt-2" id="set-tabs">
-                <button onclick="switchSet('ALL', this)" class="nav-btn bg-slate-700 px-4 py-1.5 rounded text-[10px] border border-slate-500 font-black transition-all opacity-60 hover:opacity-100 uppercase">Globale</button>
+                <button data-setid="ALL" onclick="switchSet('ALL', this)" class="nav-btn bg-slate-700 px-4 py-1.5 rounded text-[10px] border border-slate-500 font-black transition-all active uppercase">Globale</button>
             </nav>
         </div>
 
@@ -110,26 +104,47 @@
         const LS_KEY = 'fusion_world_db_v1';
 
         const DATABASE = [
-            { id: "FB01", range: 140, aa: 24, cat: "fb" }, 
-            { id: "FB02", range: 144, aa: 24, cat: "fb" },
-            { id: "FB03", range: 144, aa: 24, cat: "fb" }, 
-            { id: "FB04", range: 144, aa: 24, cat: "fb" },
-            { id: "FB05", range: 144, aa: 24, cat: "fb" },
-            { id: "FB06", range: 144, aa: 24, cat: "fb" },
-            { id: "FB07", range: 144, aa: 24, cat: "fb" },
-            { id: "FB08", range: 144, aa: 24, cat: "fb" },
-            { id: "FB09", range: 144, aa: 24, cat: "fb" },
-            { id: "SB01", range: 132, aa: 12, cat: "sb" },
-            { id: "SB02", range: 132, aa: 12, cat: "sb" },
-            { id: "FS01", range: 16, aa: 0, cat: "fs" }, 
-            { id: "FS02", range: 16, aa: 0, cat: "fs" },
-            { id: "FS03", range: 16, aa: 0, cat: "fs" },
-            { id: "FS04", range: 16, aa: 0, cat: "fs" },
-            { id: "FS05", range: 16, aa: 0, cat: "fs" },
-            { id: "FS06", range: 16, aa: 0, cat: "fs" },
-            { id: "FS07", range: 16, aa: 0, cat: "fs" },
-            { id: "FP", range: 100, aa: 0, cat: "promo" }, 
-            { id: "E", range: 100, aa: 0, cat: "energy" }
+            { id: "FB01", range: 140, cat: "fb", aaList: [1,2,3,4, 5,15,20,23,25,26,30,31,35,36,51,52,56,65,71,75,76,101,105,131,133,139,140], leaders: [1,2,3,4] }, 
+            { id: "FB02", range: 144, cat: "fb", aaList: [1,2,3,4, 15,18,30,31,35,39,52,55,68,70,71,93,101,105,110,115,120,139,140,141,142], leaders: [1,2,3,4] },
+            { id: "FB03", range: 144, cat: "fb", aaList: [1,2,3,4, 12,18,22,35,44,52,66,77,88,99,101,105,110,121,130,140,141,142,143,144], leaders: [1,2,3,4] }, 
+            { id: "FB04", range: 144, cat: "fb", aaList: [1,2,3,4, 141,142,143,144], leaders: [1,2,3,4] },
+            { id: "FB05", range: 144, cat: "fb", aaList: [1,2,3,4, 141,142,143,144], leaders: [1,2,3,4] },
+            { id: "FB06", range: 144, cat: "fb", aaList: [1,2,3,4, 119, 141,142,143,144], leaders: [1,2,3,4] },
+            { id: "FB07", range: 144, cat: "fb", aaList: [1,2,3,4, 97, 141,142,143,144], leaders: [1,2,3,4, 97] },
+            { id: "FB08", range: 144, cat: "fb", aaList: [1,2,3,4, 141,142,143,144], leaders: [1,2,3,4] },
+            { id: "FB09", range: 144, cat: "fb", aaList: [1,2,3,4, 141,142,143,144], leaders: [1,2,3,4] },
+            { 
+                id: "SB01", 
+                range: 63, 
+                cat: "sb", 
+                leaders: [1, 29, 45],
+                srList: [12, 17, 18, 25, 26, 31, 39, 57],
+                rList: [4, 37, 50, 59],
+                ucList: [8, 10, 20, 22, 24, 28, 30, 36, 41, 42, 51, 52, 55, 62],
+                cList: [2, 3, 5, 6, 7, 9, 11, 13, 14, 15, 16, 19, 21, 23, 27, 32, 33, 34, 35, 38, 40, 43, 44, 46, 47, 48, 49, 53, 54, 56, 58, 60, 61, 63],
+                aaList: [1, 29, 45, 12, 18, 25, 26, 57, 50] 
+            },
+            { 
+                id: "SB02", 
+                range: 63, 
+                cat: "sb", 
+                leaders: [1, 17, 33],
+                srList: [4, 6, 22, 23, 38, 43, 53, 58],
+                rList: [3, 5, 7, 9, 11, 19, 21, 24, 26, 27, 35, 37, 39, 41, 44, 49, 51, 54, 56, 59],
+                ucList: [8, 10, 12, 14, 20, 25, 28, 30, 36, 40, 42, 46, 50, 52, 55, 57, 60, 62],
+                cList: [2, 13, 15, 16, 18, 29, 31, 32, 34, 45, 47, 48, 61, 63],
+                // aaList aggiornata rigorosamente sulla tua lista definitiva
+                aaList: [1, 17, 33, 4, 6, 22, 23, 38, 43, 53, 58, 3, 7, 11, 19, 35, 39, 51, 54, 56, 59, 10, 25, 44, 60] 
+            },
+            { id: "FS01", range: 16, cat: "fs", aaList: [], leaders: [1] }, 
+            { id: "FS02", range: 16, cat: "fs", aaList: [], leaders: [1] },
+            { id: "FS03", range: 16, cat: "fs", aaList: [], leaders: [1] },
+            { id: "FS04", range: 16, cat: "fs", aaList: [], leaders: [1] },
+            { id: "FS05", range: 16, cat: "fs", aaList: [], leaders: [1] },
+            { id: "FS06", range: 16, cat: "fs", aaList: [], leaders: [1] },
+            { id: "FS07", range: 16, cat: "fs", aaList: [], leaders: [1] },
+            { id: "FP", range: 100, cat: "promo", aaList: [], leaders: [] }, 
+            { id: "E", range: 90, cat: "energy", aaList: [], leaders: [] }
         ];
 
         const CAT_STYLE = {
@@ -140,71 +155,39 @@
             energy: "bg-amber-900/40 border-amber-700 text-amber-300 hover:bg-amber-800"
         };
 
-        function saveToLocalStorage() {
-            localStorage.setItem(LS_KEY, JSON.stringify(storage));
-        }
+        function getRarityInfo(id, isAA, setId) {
+            if (isAA) return { label: "PARALLEL", class: "rare-aa" };
+            
+            const num = parseInt(id.split('-')[1]);
+            const setConfig = DATABASE.find(s => s.id === setId);
 
-        async function loadDatabase() {
-    const savedData = localStorage.getItem(LS_KEY);
-    
-    // MODIFICA: Se ci sono dati nel localStorage, usali e FERMATI. 
-    // Non andare a cercare il file database.json se l'utente ha già dei dati suoi.
-    if (savedData && savedData !== '{}') {
-        storage = JSON.parse(savedData);
-        console.log("Dati caricati dal LocalStorage.");
-        init(); 
-        return; // Esci dalla funzione
-    }
+            if (setId === 'E') {
+                if (num >= 70 && num <= 90) return { label: "GOLD RARE ★", class: "rare-scr" };
+                if (num >= 42 && num <= 62) return { label: "GOLD RARE", class: "rare-scr" };
+                return { label: "ENERGY", class: "rare-energy" };
+            }
 
-    // Se arriviamo qui, il localStorage è vuoto, quindi cerchiamo il file remoto
-    try {
-        const response = await fetch('database.json?v=' + Date.now());
-        if (response.ok) {
-            storage = await response.json();
-            console.log("Dati caricati da database.json.");
-        }
-    } catch (e) {
-        console.log("Inizializzazione database vuoto.");
-    }
-    
-    init(); 
-}
+            if (setId === "SB01" || setId === "SB02") {
+                if (setConfig.leaders.includes(num)) return { label: "LEADER", class: "rare-l" };
+                if (setConfig.srList && setConfig.srList.includes(num)) return { label: "SUPER RARE", class: "rare-sr" };
+                if (setConfig.rList && setConfig.rList.includes(num)) return { label: "RARE", class: "rare-r" };
+                if (setConfig.ucList && setConfig.ucList.includes(num)) return { label: "UNCOMMON", class: "rare-uc" };
+                if (setConfig.cList && setConfig.cList.includes(num)) return { label: "COMMON", class: "rare-c" };
+            }
 
-        function uploadJSON(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (confirm("Caricare i dati? Questo sovrascriverà l'inventario attuale.")) {
-                        storage = importedData;
-                        saveToLocalStorage();
-                        location.reload();
-                    }
-                } catch (err) {
-                    alert("Errore: Il file selezionato non è un JSON valido.");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function getRarityInfo(id, isAA) {
-            if (isAA) return { label: "ALT-ART", class: "rare-aa" };
-            if (id.startsWith('E-')) return { label: "ENERGY", class: "rare-energy" };
-            const parts = id.split('-');
-            const num = parseInt(parts[1]);
-            if (id.includes('FB') || id.includes('SB')) {
-                if (num <= 4) return { label: "LEADER", class: "rare-l" };
-                if (num > 130) return { label: "SECRET", class: "rare-scr" };
-                if (num > 100) return { label: "SUPER RARE", class: "rare-sr" };
-                if (num > 70) return { label: "RARE", class: "rare-r" };
-                if (num > 40) return { label: "UNCOMMON", class: "rare-uc" };
+            if (setId.startsWith('FB')) {
+                if ((setId === "FB01" && num === 140) || (setId === "FB06" && num === 119)) return { label: "SECRET", class: "rare-scr" };
+                if (setConfig && setConfig.leaders && setConfig.leaders.includes(num)) return { label: "LEADER", class: "rare-l" };
+                if (num >= 141) return { label: "SECRET", class: "rare-scr" };
+                if (num >= 105) return { label: "SUPER RARE", class: "rare-sr" };
+                if (num >= 75) return { label: "RARE", class: "rare-r" };
+                if (num >= 45) return { label: "UNCOMMON", class: "rare-uc" };
                 return { label: "COMMON", class: "rare-c" };
             }
-            if (id.includes('FS')) return { label: "STARTER", class: "rare-sr" };
-            if (id.includes('FP')) return { label: "PROMO", class: "rare-p" };
+
+            if (setId.startsWith('FS')) return { label: "LEADER / ST", class: num === 1 ? "rare-l" : "rare-st" };
+            if (setId.startsWith('FP')) return { label: "PROMO", class: "rare-p" };
+
             return { label: "STANDARD", class: "rare-c" };
         }
 
@@ -217,26 +200,28 @@
                 const btn = document.createElement('button');
                 btn.className = `nav-btn px-3 py-1.5 rounded text-[10px] border font-bold transition-all opacity-60 hover:opacity-100 ${CAT_STYLE[set.cat]}`;
                 btn.innerText = set.id;
+                btn.setAttribute('data-setid', set.id);
                 btn.onclick = () => switchSet(set.id, btn);
                 tabs.appendChild(btn);
 
                 for (let i = 1; i <= set.range; i++) {
-                    const padding = set.id === 'E' ? 2 : 3;
+                    const padding = (set.id === 'E' || set.id === 'FS04') ? 2 : 3;
                     const baseCode = `${set.id}-${String(i).padStart(padding, '0')}`;
                     addListRow(baseCode, false, set.id, set.cat);
-                    if (set.aa && i <= set.aa) {
-                        addListRow(`${baseCode} (AA)`, true, set.id, set.cat);
+                    
+                    if (set.aaList && set.aaList.includes(i)) {
+                        addListRow(`${baseCode} (P)`, true, set.id, set.cat);
                     }
                 }
             });
-            switchSet("FB01", tabs.children[1]); 
+            switchSet("ALL", document.querySelector('[data-setid="ALL"]')); 
             updateStats();
         }
 
         function addListRow(id, isAA, setId, cat) {
             const list = document.getElementById('master-list');
             const data = storage[id] || { qty: 0, price: "0.00" };
-            const rarity = getRarityInfo(id, isAA);
+            const rarity = getRarityInfo(id, isAA, setId);
             const div = document.createElement('div');
             div.className = `table-row grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 p-3 items-center text-sm ${data.qty > 0 ? 'row-owned' : ''}`;
             div.dataset.set = setId;
@@ -244,21 +229,14 @@
             div.dataset.cleanCode = id.toLowerCase().replace(/[^a-z0-9]/g, '');
             div.id = `row-${id}`;
 
-            const artLabel = isAA ? 'Alt Art' : 'Regular';
+            const artLabel = isAA ? 'Parallel' : 'Regular';
             const artClass = isAA ? 'text-pink-400 italic' : 'text-cyan-400 opacity-80';
-
-            // Logica correzione link per Cardmarket (FS set)
             let marketCode = id.split(' ')[0]; 
-            if (setId.startsWith('FS')) {
-                const parts = marketCode.split('-');
-                const num = parseInt(parts[1]);
-                marketCode = `${parts[0]}-${num < 10 ? '0' + num : num}`;
-            }
 
             div.innerHTML = `
                 <div class="flex flex-col">
                     <div class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full set-${cat} bg-current"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-current set-${cat}"></span>
                         <span class="font-mono font-bold text-slate-200 text-xs">${id}</span>
                     </div>
                     <span class="text-[9px] font-black uppercase tracking-tighter pl-3.5 ${rarity.class}">${rarity.label}</span>
@@ -283,14 +261,14 @@
 
         function changeQty(id, delta) {
             if (!storage[id]) storage[id] = { qty: 0, price: "0.00" };
-            let newQty = storage[id].qty + delta;
-            if (newQty < 0) newQty = 0;
-            storage[id].qty = newQty;
-            document.getElementById(`qty-val-${id}`).innerText = newQty;
+            storage[id].qty = Math.max(0, storage[id].qty + delta);
+            document.getElementById(`qty-val-${id}`).innerText = storage[id].qty;
             const row = document.getElementById(`row-${id}`);
-            row.dataset.qty = newQty;
-            newQty > 0 ? row.classList.add('row-owned') : row.classList.remove('row-owned');
-            document.getElementById(`total-${id}`).innerText = `€ ${(newQty * storage[id].price).toFixed(2)}`;
+            row.dataset.qty = storage[id].qty;
+            if (storage[id].qty > 0) row.classList.add('row-owned');
+            else row.classList.remove('row-owned');
+            const totalPrice = (storage[id].qty * storage[id].price).toFixed(2);
+            document.getElementById(`total-${id}`).innerText = `€ ${totalPrice}`;
             saveToLocalStorage(); 
             updateStats();
             applyFilters();
@@ -298,22 +276,28 @@
 
         function updatePrice(id, val) {
             if (!storage[id]) storage[id] = { qty: 0, price: "0.00" };
-            storage[id].price = parseFloat(val).toFixed(2) || 0;
-            document.getElementById(`total-${id}`).innerText = `€ ${(storage[id].qty * storage[id].price).toFixed(2)}`;
+            const numericVal = parseFloat(val);
+            storage[id].price = isNaN(numericVal) ? "0.00" : numericVal.toFixed(2);
+            const totalPrice = (storage[id].qty * storage[id].price).toFixed(2);
+            document.getElementById(`total-${id}`).innerText = `€ ${totalPrice}`;
             saveToLocalStorage(); 
             updateStats();
         }
 
         function updateStats() {
             let q = 0, v = 0;
-            Object.values(storage).forEach(i => { q += i.qty; v += (i.qty * i.price); });
+            Object.values(storage).forEach(i => { 
+                const qty = parseInt(i.qty) || 0;
+                const price = parseFloat(i.price) || 0;
+                q += qty; v += (qty * price); 
+            });
             document.getElementById('stat-owned').innerText = q;
             document.getElementById('stat-value').innerText = `€ ${v.toFixed(2)}`;
         }
 
         function switchSet(setId, btn) {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            if(btn) btn.classList.add('active');
             applyFilters();
         }
 
@@ -321,28 +305,50 @@
             const searchVal = document.getElementById('search').value.toLowerCase().replace(/[^a-z0-9]/g, '');
             const showOnlyOwned = document.getElementById('owned-only').checked;
             const activeBtn = document.querySelector('.nav-btn.active');
-            const activeSet = activeBtn ? activeBtn.innerText : 'GLOBALE';
+            const activeSet = activeBtn ? activeBtn.getAttribute('data-setid') : 'ALL';
+
             document.querySelectorAll('.table-row').forEach(row => {
                 const qty = parseInt(row.dataset.qty) || 0;
                 const matchesSearch = searchVal === '' || row.dataset.cleanCode.includes(searchVal);
                 const matchesOwned = !showOnlyOwned || qty > 0;
-                const matchesSet = activeSet.toLowerCase().includes('globale') || row.dataset.set === activeSet;
+                const matchesSet = activeSet === 'ALL' || row.dataset.set === activeSet;
                 row.style.display = (matchesSearch && matchesOwned && matchesSet) ? 'grid' : 'none';
             });
         }
 
         function downloadJSON() {
-            const cleanedStorage = {};
-            for (const key in storage) {
-                if (storage[key].qty > 0) cleanedStorage[key] = storage[key];
-            }
-            const blob = new Blob([JSON.stringify(cleanedStorage, null, 4)], { type: "application/json" });
+            const cleaned = {};
+            for (const key in storage) if (storage[key].qty > 0) cleaned[key] = storage[key];
+            const blob = new Blob([JSON.stringify(cleaned, null, 4)], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
-            a.href = url;
-            a.download = "database.json";
-            a.click();
-            URL.revokeObjectURL(url);
+            a.href = url; a.download = "fusion_world_inventory.json"; a.click();
+        }
+
+        function uploadJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    storage = JSON.parse(e.target.result);
+                    saveToLocalStorage();
+                    location.reload();
+                } catch (err) { alert("File JSON non valido."); }
+            };
+            reader.readAsText(file);
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem(LS_KEY, JSON.stringify(storage));
+        }
+
+        async function loadDatabase() {
+            const savedData = localStorage.getItem(LS_KEY);
+            if (savedData) {
+                try { storage = JSON.parse(savedData); } catch (e) { storage = {}; }
+            }
+            init(); 
         }
 
         loadDatabase();
