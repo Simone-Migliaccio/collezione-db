@@ -145,23 +145,30 @@
         }
 
         async function loadDatabase() {
-            const savedData = localStorage.getItem(LS_KEY);
-            if (savedData) {
-                storage = JSON.parse(savedData);
-                console.log("Dati caricati dal LocalStorage.");
-            } else {
-                try {
-                    const response = await fetch('database.json?v=' + Date.now());
-                    if (response.ok) {
-                        storage = await response.json();
-                        console.log("Dati caricati da database.json.");
-                    }
-                } catch (e) {
-                    console.log("Inizializzazione database vuoto.");
-                }
-            }
-            init(); 
+    const savedData = localStorage.getItem(LS_KEY);
+    
+    // MODIFICA: Se ci sono dati nel localStorage, usali e FERMATI. 
+    // Non andare a cercare il file database.json se l'utente ha già dei dati suoi.
+    if (savedData && savedData !== '{}') {
+        storage = JSON.parse(savedData);
+        console.log("Dati caricati dal LocalStorage.");
+        init(); 
+        return; // Esci dalla funzione
+    }
+
+    // Se arriviamo qui, il localStorage è vuoto, quindi cerchiamo il file remoto
+    try {
+        const response = await fetch('database.json?v=' + Date.now());
+        if (response.ok) {
+            storage = await response.json();
+            console.log("Dati caricati da database.json.");
         }
+    } catch (e) {
+        console.log("Inizializzazione database vuoto.");
+    }
+    
+    init(); 
+}
 
         function uploadJSON(event) {
             const file = event.target.files[0];
