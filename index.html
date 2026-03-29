@@ -109,37 +109,14 @@
             { id: "FB03", range: 144, cat: "fb", aaList: [1,2,3,4, 12,18,22,35,44,52,66,77,88,99,101,105,110,121,130,140,141,142,143,144], leaders: [1,2,3,4] }, 
             { id: "FB04", range: 144, cat: "fb", aaList: [1,2,3,4, 141,142,143,144], leaders: [1,2,3,4] },
             { id: "FB05", range: 144, cat: "fb", aaList: [1,2,3,4, 141,142,143,144], leaders: [1,2,3,4] },
-            { id: "FB06", range: 144, cat: "fb", aaList: [1,2,3,4, 119, 141,142,143,144], leaders: [1,2,3,4] },
+            { id: "FB06", range: 144, cat: "fb", aaList: [1,2,3,4, 119, 108, 141,142,143,144], leaders: [1,2,3,4] },
             { id: "FB07", range: 144, cat: "fb", aaList: [1,2,3,4, 97, 141,142,143,144], leaders: [1,2,3,4, 97] },
             { id: "FB08", range: 144, cat: "fb", aaList: [1,2,3,4, 141,142,143,144], leaders: [1,2,3,4] },
             { id: "FB09", range: 144, cat: "fb", aaList: [1,2,3,4, 141,142,143,144], leaders: [1,2,3,4] },
-            { 
-                id: "SB01", 
-                range: 63, 
-                cat: "sb", 
-                leaders: [1, 29, 45],
-                srList: [12, 17, 18, 25, 26, 31, 39, 57],
-                rList: [4, 37, 50, 59],
-                ucList: [8, 10, 20, 22, 24, 28, 30, 36, 41, 42, 51, 52, 55, 62],
-                cList: [2, 3, 5, 6, 7, 9, 11, 13, 14, 15, 16, 19, 21, 23, 27, 32, 33, 34, 35, 38, 40, 43, 44, 46, 47, 48, 49, 53, 54, 56, 58, 60, 61, 63],
-                aaList: [1, 29, 45, 12, 18, 25, 26, 57, 50] 
-            },
-            { 
-                id: "SB02", 
-                range: 63, 
-                cat: "sb", 
-                leaders: [1, 17, 33],
-                srList: [4, 6, 22, 23, 38, 43, 53, 58],
-                rList: [3, 5, 7, 9, 11, 19, 21, 24, 26, 27, 35, 37, 39, 41, 44, 49, 51, 54, 56, 59],
-                ucList: [8, 10, 12, 14, 20, 25, 28, 30, 36, 40, 42, 46, 50, 52, 55, 57, 60, 62],
-                cList: [2, 13, 15, 16, 18, 29, 31, 32, 34, 45, 47, 48, 61, 63],
-                // aaList aggiornata rigorosamente sulla tua lista definitiva
-                aaList: [1, 17, 33, 4, 6, 22, 23, 38, 43, 53, 58, 3, 7, 11, 19, 35, 39, 51, 54, 56, 59, 10, 25, 44, 60] 
-            },
             { id: "FS01", range: 16, cat: "fs", aaList: [], leaders: [1] }, 
             { id: "FS02", range: 16, cat: "fs", aaList: [], leaders: [1] },
             { id: "FS03", range: 16, cat: "fs", aaList: [], leaders: [1] },
-            { id: "FS04", range: 16, cat: "fs", aaList: [], leaders: [1] },
+            { id: "FS04", range: 16, cat: "fs", aaList: [1], leaders: [1] },
             { id: "FS05", range: 16, cat: "fs", aaList: [], leaders: [1] },
             { id: "FS06", range: 16, cat: "fs", aaList: [], leaders: [1] },
             { id: "FS07", range: 16, cat: "fs", aaList: [], leaders: [1] },
@@ -156,39 +133,42 @@
         };
 
         function getRarityInfo(id, isAA, setId) {
-            if (isAA) return { label: "PARALLEL", class: "rare-aa" };
-            
             const num = parseInt(id.split('-')[1]);
             const setConfig = DATABASE.find(s => s.id === setId);
 
+            // LOGICA ETICHETTE SOTTO IL CODICE (Sempre basata sulla rarità base)
+            let baseRarity = { label: "COMMON", class: "rare-c" };
+
             if (setId === 'E') {
-                if (num >= 70 && num <= 90) return { label: "GOLD RARE ★", class: "rare-scr" };
-                if (num >= 42 && num <= 62) return { label: "GOLD RARE", class: "rare-scr" };
-                return { label: "ENERGY", class: "rare-energy" };
+                if (num >= 70 && num <= 90) baseRarity = { label: "GOLD RARE ★", class: "rare-scr" };
+                else if (num >= 42 && num <= 62) baseRarity = { label: "GOLD RARE", class: "rare-scr" };
+                else baseRarity = { label: "ENERGY", class: "rare-energy" };
+            } else if (setId === "SB01" || setId === "SB02") {
+                if (setConfig.leaders.includes(num)) baseRarity = { label: "LEADER", class: "rare-l" };
+                else if (setConfig.secList && setConfig.secList.includes(num)) baseRarity = { label: "SECRET", class: "rare-scr" };
+                else if (setConfig.srList && setConfig.srList.includes(num)) baseRarity = { label: "SUPER RARE", class: "rare-sr" };
+                else if (setConfig.rList && setConfig.rList.includes(num)) baseRarity = { label: "RARE", class: "rare-r" };
+                else if (setConfig.ucList && setConfig.ucList.includes(num)) baseRarity = { label: "UNCOMMON", class: "rare-uc" };
+            } else if (setId.startsWith('FB')) {
+                if ((setId === "FB01" && num === 140) || (setId === "FB06" && num === 119)) baseRarity = { label: "SECRET", class: "rare-scr" };
+                else if (setConfig && setConfig.leaders && setConfig.leaders.includes(num)) baseRarity = { label: "LEADER", class: "rare-l" };
+                else if (num >= 141) baseRarity = { label: "SECRET", class: "rare-scr" };
+                else if (num >= 105) baseRarity = { label: "SUPER RARE", class: "rare-sr" };
+                else if (num >= 75) baseRarity = { label: "RARE", class: "rare-r" };
+                else if (num >= 45) baseRarity = { label: "UNCOMMON", class: "rare-uc" };
+            } else if (setId.startsWith('FS')) {
+                baseRarity = num === 1 ? { label: "LEADER", class: "rare-l" } : { label: "ST", class: "rare-st" };
+            } else if (setId.startsWith('FP')) {
+                baseRarity = { label: "PROMO", class: "rare-p" };
             }
 
-            if (setId === "SB01" || setId === "SB02") {
-                if (setConfig.leaders.includes(num)) return { label: "LEADER", class: "rare-l" };
-                if (setConfig.srList && setConfig.srList.includes(num)) return { label: "SUPER RARE", class: "rare-sr" };
-                if (setConfig.rList && setConfig.rList.includes(num)) return { label: "RARE", class: "rare-r" };
-                if (setConfig.ucList && setConfig.ucList.includes(num)) return { label: "UNCOMMON", class: "rare-uc" };
-                if (setConfig.cList && setConfig.cList.includes(num)) return { label: "COMMON", class: "rare-c" };
+            // SE È UNA VERSIONE ALTERNATIVA (P), MODIFICHIAMO SOLO L'ETICHETTA ART (gestita in addListRow)
+            // Ma per SB02-025 (P) forziamo l'etichetta rarità visiva se necessario
+            if (isAA && id.includes("SB02-025 (P)")) {
+                return { label: "MANGA RARE", class: "rare-scr", isManga: true };
             }
 
-            if (setId.startsWith('FB')) {
-                if ((setId === "FB01" && num === 140) || (setId === "FB06" && num === 119)) return { label: "SECRET", class: "rare-scr" };
-                if (setConfig && setConfig.leaders && setConfig.leaders.includes(num)) return { label: "LEADER", class: "rare-l" };
-                if (num >= 141) return { label: "SECRET", class: "rare-scr" };
-                if (num >= 105) return { label: "SUPER RARE", class: "rare-sr" };
-                if (num >= 75) return { label: "RARE", class: "rare-r" };
-                if (num >= 45) return { label: "UNCOMMON", class: "rare-uc" };
-                return { label: "COMMON", class: "rare-c" };
-            }
-
-            if (setId.startsWith('FS')) return { label: "LEADER / ST", class: num === 1 ? "rare-l" : "rare-st" };
-            if (setId.startsWith('FP')) return { label: "PROMO", class: "rare-p" };
-
-            return { label: "STANDARD", class: "rare-c" };
+            return baseRarity;
         }
 
         function init() {
@@ -207,10 +187,17 @@
                 for (let i = 1; i <= set.range; i++) {
                     const padding = (set.id === 'E' || set.id === 'FS04') ? 2 : 3;
                     const baseCode = `${set.id}-${String(i).padStart(padding, '0')}`;
+                    
+                    // Aggiungi versione Regular
                     addListRow(baseCode, false, set.id, set.cat);
                     
+                    // Aggiungi versioni Alternative
                     if (set.aaList && set.aaList.includes(i)) {
                         addListRow(`${baseCode} (P)`, true, set.id, set.cat);
+                        // Super Alt Art specifica per SB02-043
+                        if(set.id === "SB02" && i === 43) {
+                             addListRow(`${baseCode} (SA)`, true, set.id, set.cat);
+                        }
                     }
                 }
             });
@@ -229,8 +216,23 @@
             div.dataset.cleanCode = id.toLowerCase().replace(/[^a-z0-9]/g, '');
             div.id = `row-${id}`;
 
-            const artLabel = isAA ? 'Parallel' : 'Regular';
-            const artClass = isAA ? 'text-pink-400 italic' : 'text-cyan-400 opacity-80';
+            // Gestione etichetta ART (Colonna centrale)
+            let artLabel = 'Regular';
+            let artClass = 'text-cyan-400 opacity-80';
+
+            if (id.includes("(P)")) {
+                if (id.includes("SB02-025")) {
+                    artLabel = 'MANGA RARE';
+                    artClass = 'text-orange-400 font-black italic';
+                } else {
+                    artLabel = 'ALT ART (V2)';
+                    artClass = 'text-pink-400 italic font-bold';
+                }
+            } else if (id.includes("(SA)")) {
+                artLabel = 'SUPER ALT ART';
+                artClass = 'text-pink-500 font-black italic';
+            }
+            
             let marketCode = id.split(' ')[0]; 
 
             div.innerHTML = `
